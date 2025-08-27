@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using BirFikrimVar.Models;
 namespace BirFikrimVar
 {
     public class Program
@@ -8,7 +10,15 @@ namespace BirFikrimVar
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<MyDBcontext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    policy => policy.AllowAnyOrigin()
+                                    .AllowAnyHeader()
+                                    .AllowAnyMethod());
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

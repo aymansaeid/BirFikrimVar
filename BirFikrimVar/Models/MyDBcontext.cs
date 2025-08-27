@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BirFikrimVar.Models;
 
-public partial class CUsers2a04DocumentsBirfikrimvarMdfContext : DbContext
+public partial class MyDBcontext : DbContext
 {
-    public CUsers2a04DocumentsBirfikrimvarMdfContext()
+    public MyDBcontext()
     {
     }
 
-    public CUsers2a04DocumentsBirfikrimvarMdfContext(DbContextOptions<CUsers2a04DocumentsBirfikrimvarMdfContext> options)
+    public MyDBcontext(DbContextOptions<MyDBcontext> options)
         : base(options)
     {
     }
@@ -22,10 +22,6 @@ public partial class CUsers2a04DocumentsBirfikrimvarMdfContext : DbContext
     public virtual DbSet<Like> Likes { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\2A04\\Documents\\BirFikrimVar.mdf;Integrated Security=True;Connect Timeout=30;Encrypt=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
