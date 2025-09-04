@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BirFikrimVar.Models;
+using Castle.Core.Resource;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BirFikrimVar.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Mapster;
 
 namespace BirFikrimVar.Controllers
 {
@@ -24,7 +26,8 @@ namespace BirFikrimVar.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users.Include(User => User.Ideas).    
+                ToListAsync();
         }
 
         // GET: api/Users/5
@@ -75,12 +78,17 @@ namespace BirFikrimVar.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<UserDto>> PostUser(CreateUserDto getFromUser)
         {
+            // 1 we gona do the adapt thing 
+            var user = getFromUser.Adapt<User>();
+            // 2 we gona add it to the database 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+            // 3 we gona show the result if its worked or not ? 
+            var result = user.Adapt<UserDto>();
 
-            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+            return CreatedAtAction("GetUser", new { id = user.UserId }, result);
         }
 
         // DELETE: api/Users/5
