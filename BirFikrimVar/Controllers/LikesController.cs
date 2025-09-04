@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BirFikrimVar.Models;
 
 namespace BirFikrimVar.Controllers
 {
-    public class LikesController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class LikesController : ControllerBase
     {
         private readonly MyDBcontext _context;
 
@@ -18,147 +20,83 @@ namespace BirFikrimVar.Controllers
             _context = context;
         }
 
-        // GET: Likes
-        public async Task<IActionResult> Index()
+        // GET: api/Likes1
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Like>>> GetLikes()
         {
-            var myDBcontext = _context.Likes.Include(l => l.Idea).Include(l => l.User);
-            return View(await myDBcontext.ToListAsync());
+            return await _context.Likes.ToListAsync();
         }
 
-        // GET: Likes/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: api/Likes1/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Like>> GetLike(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var like = await _context.Likes
-                .Include(l => l.Idea)
-                .Include(l => l.User)
-                .FirstOrDefaultAsync(m => m.LikeId == id);
-            if (like == null)
-            {
-                return NotFound();
-            }
-
-            return View(like);
-        }
-
-        // GET: Likes/Create
-        public IActionResult Create()
-        {
-            ViewData["IdeaId"] = new SelectList(_context.Ideas, "IdeaId", "IdeaId");
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId");
-            return View();
-        }
-
-        // POST: Likes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("LikeId,IdeaId,UserId,CreatedDate")] Like like)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(like);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["IdeaId"] = new SelectList(_context.Ideas, "IdeaId", "IdeaId", like.IdeaId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", like.UserId);
-            return View(like);
-        }
-
-        // GET: Likes/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var like = await _context.Likes.FindAsync(id);
+
             if (like == null)
             {
                 return NotFound();
             }
-            ViewData["IdeaId"] = new SelectList(_context.Ideas, "IdeaId", "IdeaId", like.IdeaId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", like.UserId);
-            return View(like);
+
+            return like;
         }
 
-        // POST: Likes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("LikeId,IdeaId,UserId,CreatedDate")] Like like)
+        // PUT: api/Likes1/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutLike(int id, Like like)
         {
             if (id != like.LikeId)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            if (ModelState.IsValid)
+            _context.Entry(like).State = EntityState.Modified;
+
+            try
             {
-                try
-                {
-                    _context.Update(like);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!LikeExists(like.LikeId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            ViewData["IdeaId"] = new SelectList(_context.Ideas, "IdeaId", "IdeaId", like.IdeaId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", like.UserId);
-            return View(like);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!LikeExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
-        // GET: Likes/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // POST: api/Likes1
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Like>> PostLike(Like like)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            _context.Likes.Add(like);
+            await _context.SaveChangesAsync();
 
-            var like = await _context.Likes
-                .Include(l => l.Idea)
-                .Include(l => l.User)
-                .FirstOrDefaultAsync(m => m.LikeId == id);
+            return CreatedAtAction("GetLike", new { id = like.LikeId }, like);
+        }
+
+        // DELETE: api/Likes1/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteLike(int id)
+        {
+            var like = await _context.Likes.FindAsync(id);
             if (like == null)
             {
                 return NotFound();
             }
 
-            return View(like);
-        }
-
-        // POST: Likes/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var like = await _context.Likes.FindAsync(id);
-            if (like != null)
-            {
-                _context.Likes.Remove(like);
-            }
-
+            _context.Likes.Remove(like);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return NoContent();
         }
 
         private bool LikeExists(int id)
