@@ -8,7 +8,6 @@ public class UsersController : Controller
     public UsersController(IHttpClientFactory httpClientFactory)
     {
         _http = httpClientFactory.CreateClient("ApiClient");
-        // ApiClient must be configured in Program.cs with BaseAddress
     }
 
     // GET: /Users
