@@ -24,6 +24,11 @@ namespace BirFikrimVar
                                     .AllowAnyMethod());
             });
 
+            builder.Services.AddHttpClient("ApiClient", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7266/");
+            });
+
             // Add Swagger
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

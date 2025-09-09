@@ -12,11 +12,11 @@ namespace BirFikrimVar.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class IdeasController : ControllerBase
+    public class IdeasApiController : ControllerBase
     {
         private readonly MyDBcontext _context;
 
-        public IdeasController(MyDBcontext context)
+        public IdeasApiController(MyDBcontext context)
         {
             _context = context;
         }

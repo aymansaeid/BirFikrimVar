@@ -12,11 +12,11 @@ namespace BirFikrimVar.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LikesController : ControllerBase
+    public class LikesApiController : ControllerBase
     {
         private readonly MyDBcontext _context;
 
-        public LikesController(MyDBcontext context)
+        public LikesApiController(MyDBcontext context)
         {
             _context = context;
         }
