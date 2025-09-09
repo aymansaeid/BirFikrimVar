@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BirFikrimVar.Models;
+using Mapster;
 
 namespace BirFikrimVar.Controllers
 {
@@ -22,65 +23,36 @@ namespace BirFikrimVar.Controllers
 
         // GET: api/Likes1
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Like>>> GetLikes()
+        public async Task<ActionResult<IEnumerable<LikeResponseDto>>> GetLikes()
         {
-            return await _context.Likes.ToListAsync();
-        }
-
-        // GET: api/Likes1/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Like>> GetLike(int id)
+            var res = await _context.Likes
+        .Include(like => like.User)
+        .Select(like => new LikeResponseDto
         {
-            var like = await _context.Likes.FindAsync(id);
+            LikeId = like.LikeId,
+            IdeaId = like.IdeaId,
+            UserId = like.UserId,
+            FullName = like.User.FullName,
+            CreatedDate = like.CreatedDate ?? DateTime.UtcNow
+        })
+        .ToListAsync();
 
-            if (like == null)
-            {
-                return NotFound();
-            }
-
-            return like;
-        }
-
-        // PUT: api/Likes1/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutLike(int id, Like like)
-        {
-            if (id != like.LikeId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(like).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!LikeExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return res;
         }
 
         // POST: api/Likes1
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Like>> PostLike(Like like)
+        public async Task<ActionResult<Like>> PostLike(CreateLikeDto dto)
         {
+            var like = dto.Adapt<Like>();
+            like.CreatedDate = DateTime.Now;
+
             _context.Likes.Add(like);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLike", new { id = like.LikeId }, like);
+            var result = like.Adapt<LikeResponseDto>();
+            return Ok(result);
         }
 
         // DELETE: api/Likes1/5
