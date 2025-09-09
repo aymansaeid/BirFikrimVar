@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BirFikrimVar.Models;
+using Mapster;
 
 namespace BirFikrimVar.Controllers
 {
@@ -22,14 +23,15 @@ namespace BirFikrimVar.Controllers
 
         // GET: api/Ideas
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Idea>>> GetIdeas()
+        public async Task<ActionResult<IEnumerable<IdeaDto>>> GetIdeas()
         {
-            return await _context.Ideas.ToListAsync();
+            var res = await _context.Ideas.ToListAsync();
+            return res.Adapt<List<IdeaDto>>();
         }
 
         // GET: api/Ideas/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Idea>> GetIdea(int id)
+        public async Task<ActionResult<IdeaDto>> GetIdea(int id)
         {
             var idea = await _context.Ideas.FindAsync(id);
 
@@ -38,20 +40,20 @@ namespace BirFikrimVar.Controllers
                 return NotFound();
             }
 
-            return idea;
+            return idea.Adapt<IdeaDto>();
         }
 
         // PUT: api/Ideas/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutIdea(int id, Idea idea)
+        public async Task<IActionResult> PutIdea(int id, UpdateIdeaDto dto)
         {
+            var idea = await _context.Ideas.FindAsync(id);
             if (id != idea.IdeaId)
             {
                 return BadRequest();
             }
-
-            _context.Entry(idea).State = EntityState.Modified;
+            dto.Adapt(idea);
 
             try
             {
@@ -75,8 +77,12 @@ namespace BirFikrimVar.Controllers
         // POST: api/Ideas
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Idea>> PostIdea(Idea idea)
+        public async Task<ActionResult<Idea>> PostIdea(CreateIdeaDto dto)
         {
+            var idea = dto.Adapt<Idea>();
+            idea.CreatedDate = DateTime.Now;
+            idea.LikeCount = 0;
+
             _context.Ideas.Add(idea);
             await _context.SaveChangesAsync();
 
