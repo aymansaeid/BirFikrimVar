@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BirFikrimVar.Models;
+using Mapster;
 
 namespace BirFikrimVar.Controllers
 {
@@ -22,14 +23,15 @@ namespace BirFikrimVar.Controllers
 
         // GET: api/Comments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetComments()
+        public async Task<ActionResult<IEnumerable<CommentDto>>> GetComments()
         {
-            return await _context.Comments.ToListAsync();
+            var res = await _context.Comments.ToListAsync();
+            return res.Adapt<List<CommentDto>>();
         }
 
         // GET: api/Comments/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Comment>> GetComment(int id)
+        public async Task<ActionResult<CommentDto>> GetComment(int id)
         {
             var comment = await _context.Comments.FindAsync(id);
 
@@ -37,19 +39,22 @@ namespace BirFikrimVar.Controllers
             {
                 return NotFound();
             }
+             var res = comment.Adapt<CommentDto>(); 
 
-            return comment;
+            return res;
         }
 
         // PUT: api/Comments/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutComment(int id, Comment comment)
+        public async Task<IActionResult> PutComment(int id, [FromBody] UpdateCommentDto commentdto)
         {
-            if (id != comment.CommentId)
+            var comment = await _context.Comments.FindAsync(id);
+            if (comment == null)
             {
-                return BadRequest();
+                return NotFound();
             }
+            commentdto.Adapt(comment);
 
             _context.Entry(comment).State = EntityState.Modified;
 
@@ -75,8 +80,10 @@ namespace BirFikrimVar.Controllers
         // POST: api/Comments
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Comment>> PostComment(Comment comment)
+        public async Task<ActionResult<Comment>> PostComment(CreateCommentDto dto)
         {
+            var comment = dto.Adapt<Comment>(); 
+            comment.CreatedDate = DateTime.Now;
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
