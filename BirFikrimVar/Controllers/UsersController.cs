@@ -24,15 +24,16 @@ namespace BirFikrimVar.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return await _context.Users.Include(User => User.Ideas).    
-                ToListAsync();
+            var res = await _context.Users.ToListAsync();
+
+            return res.Adapt<List<UserDto>>();
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<UserDto>> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
 
@@ -41,20 +42,21 @@ namespace BirFikrimVar.Controllers
                 return NotFound();
             }
 
-            return user;
+            return user.Adapt<UserDto>();
         }
 
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        public async Task<IActionResult> PutUser(int id, UpdateUserDto dto)
         {
+            var user = await _context.Users.FindAsync(id);
             if (id != user.UserId)
             {
                 return BadRequest();
             }
+            dto.Adapt(user);
 
-            _context.Entry(user).State = EntityState.Modified;
 
             try
             {
@@ -75,20 +77,31 @@ namespace BirFikrimVar.Controllers
             return NoContent();
         }
 
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<UserDto>> PostUser(CreateUserDto getFromUser)
+        // POST: api/register
+        [HttpPost("register")]
+        public async Task<ActionResult<UserDto>> Register(RegisterUserDto dto)
         {
-            // 1 we gona do the adapt thing 
-            var user = getFromUser.Adapt<User>();
-            // 2 we gona add it to the database 
+            var user = dto.Adapt<User>();
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            // 3 we gona show the result if its worked or not ? 
-            var result = user.Adapt<UserDto>();
 
-            return CreatedAtAction("GetUser", new { id = user.UserId }, result);
+            var result = user.Adapt<UserDto>();
+            return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, result);
+        }
+
+        // POST: api/login
+        [HttpPost("login")]
+        public async Task<ActionResult<UserDto>> Login(LoginUserDto dto)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == dto.Email && u.Password == dto.Password);
+            if (user == null)
+            {
+                return Unauthorized("Invalid email or password.");
+            }
+            var result = user.Adapt<UserDto>();
+            return Ok(result);
         }
 
         // DELETE: api/Users/5
