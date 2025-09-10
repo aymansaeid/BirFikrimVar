@@ -31,7 +31,7 @@ public class UsersController : Controller
         var response = await _http.PostAsJsonAsync("api/UsersApi/register", dto);
         if (response.IsSuccessStatusCode)
         {
-            return RedirectToAction("Index");
+            return RedirectToAction("Login");
         }
         return View(dto);
     }
@@ -50,12 +50,23 @@ public class UsersController : Controller
         if (response.IsSuccessStatusCode)
         {
             var user = await response.Content.ReadFromJsonAsync<UserDto>();
-            // TODO: store user in session or cookie
-            TempData["Message"] = $"Welcome {user.FullName}";
-            return RedirectToAction("Index");
+            if (user != null)
+            {
+                // store in session
+                HttpContext.Session.SetInt32("UserId", user.UserId);
+                HttpContext.Session.SetString("FullName", user.FullName);
+                HttpContext.Session.SetString("Email", user.Email);
+
+                return RedirectToAction("Index", "Home");
+            }
         }
         ModelState.AddModelError("", "Invalid email or password.");
         return View(dto);
+    }
+    public IActionResult Logout()
+    {
+        HttpContext.Session.Clear();
+        return RedirectToAction("Login");
     }
 
     // GET: /Users/Edit/5
