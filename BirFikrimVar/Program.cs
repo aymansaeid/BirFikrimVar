@@ -26,7 +26,7 @@ namespace BirFikrimVar
 
             builder.Services.AddHttpClient("ApiClient", client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7266/");
+                client.BaseAddress = new Uri("https://localhost:7255/");
             });
 
             // Add Swagger

@@ -10,6 +10,7 @@ public class UsersController : Controller
         _http = httpClientFactory.CreateClient("ApiClient");
     }
 
+
     // GET: /Users
     public async Task<IActionResult> Index()
     {
