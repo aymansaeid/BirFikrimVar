@@ -1,48 +1,13 @@
-﻿@model BirFikrimVar.Models.Idea
+﻿@model IdeaDto
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Idea Details";
 }
 
-<h1>Details</h1>
+<h2>@Model.Title</h2>
+<p>@Model.Content</p>
+<p>
+    <small>Created: @Model.CreatedDate?.ToString("g")</small>
+</p>
 
-<div>
-    <h4>Idea</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Content)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Content)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LikeCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LikeCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.UserId)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdeaId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+<a asp-controller="Ideas" asp-action="Index" class="btn btn-secondary">Back to Feed</a>

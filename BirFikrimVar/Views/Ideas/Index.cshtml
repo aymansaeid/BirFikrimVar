@@ -1,59 +1,29 @@
-﻿@model IEnumerable<BirFikrimVar.Models.Idea>
+﻿@model List<IdeaDto>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Ideas Feed";
 }
 
-<h1>Index</h1>
+<h2>All Ideas</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Content)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LikeCount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Content)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LikeCount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.UserId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdeaId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdeaId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdeaId">Delete</a>
-            </td>
-        </tr>
+@if (!Model.Any())
+{
+    <p>No ideas posted yet.</p>
 }
-    </tbody>
-</table>
+else
+{
+    <div class="list-group">
+        @foreach (var idea in Model)
+        {
+            <div class="list-group-item mb-3 shadow-sm">
+                <h4>@idea.Title</h4>
+                <p>@(idea.Content.Length > 100 ? idea.Content.Substring(0, 100) + "..." : idea.Content)</p>
+                <small>
+                    Posted on @idea.CreatedDate?.ToString("g")
+                </small>
+                <br />
+                <a asp-action="Details" asp-route-id="@idea.IdeaId" class="btn btn-sm btn-primary mt-2">View Details</a>
+            </div>
+        }
+    </div>
+}
