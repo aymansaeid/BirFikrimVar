@@ -41,15 +41,20 @@ namespace BirFikrimVar.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateIdeaDto dto)
         {
-            if (!ModelState.IsValid)
-                return View(dto);
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+            {
+                return RedirectToAction("Login", "Users");
+            }
+
+            dto.UserId = userId.Value;
 
             var response = await _http.PostAsJsonAsync("api/IdeasApi", dto);
-
             if (response.IsSuccessStatusCode)
-                return RedirectToAction(nameof(Index));
+            {
+                return RedirectToAction("Index");
+            }
 
-            ModelState.AddModelError("", "Failed to create idea.");
             return View(dto);
         }
 
