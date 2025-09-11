@@ -1,0 +1,33 @@
+﻿@{
+    var userId = Context.Session.GetInt32("UserId");
+    var fullName = Context.Session.GetString("FullName");
+    bool isLoggedIn = userId.HasValue;
+}
+
+@if (isLoggedIn)
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Ideas" asp-action="Create">Post Idea</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Users" asp-action="Profile" asp-route-id="@userId">Profile</a>
+    </li>
+    <li class="nav-item">
+        <span class="navbar-text text-light">Welcome, @fullName</span>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Users" asp-action="Logout">Logout</a>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Users" asp-action="Login">Login</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Users" asp-action="Register">Register</a>
+    </li>
+}
