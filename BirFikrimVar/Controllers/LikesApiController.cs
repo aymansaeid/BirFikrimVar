@@ -40,6 +40,16 @@ namespace BirFikrimVar.Controllers
             return res;
         }
 
+        [HttpGet("count/{ideaId}")]
+        public async Task<ActionResult<int>> GetLikeCount(int ideaId)
+        {
+            var count = await _context.Likes
+                .Where(like => like.IdeaId == ideaId)
+                .CountAsync();
+
+            return count;
+        }
+
         // POST: api/Likes1
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
