@@ -129,5 +129,22 @@ namespace BirFikrimVar.Controllers
 
             return Problem("Failed to delete idea.");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> AddComment(int ideaId, string content)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue) return RedirectToAction("Login", "Users");
+
+            var dto = new CreateCommentDto
+            {
+                IdeaId = ideaId,
+                UserId = userId.Value,
+                Content = content
+            };
+
+            await _http.PostAsJsonAsync("api/CommentsApi", dto);
+            return RedirectToAction("Details", new { id = ideaId });
+        }
     }
 }
