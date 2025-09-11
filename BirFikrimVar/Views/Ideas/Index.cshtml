@@ -1,29 +1,35 @@
-﻿@model List<IdeaDto>
+﻿@model IEnumerable<IdeaDto>
 
 @{
     ViewData["Title"] = "Ideas Feed";
 }
 
-<h2>All Ideas</h2>
+<h2>Ideas Feed</h2>
 
-@if (!Model.Any())
+@foreach (var idea in Model)
 {
-    <p>No ideas posted yet.</p>
-}
-else
-{
-    <div class="list-group">
-        @foreach (var idea in Model)
-        {
-            <div class="list-group-item mb-3 shadow-sm">
-                <h4>@idea.Title</h4>
-                <p>@(idea.Content.Length > 100 ? idea.Content.Substring(0, 100) + "..." : idea.Content)</p>
-                <small>
-                    Posted on @idea.CreatedDate?.ToString("g")
-                </small>
-                <br />
-                <a asp-action="Details" asp-route-id="@idea.IdeaId" class="btn btn-sm btn-primary mt-2">View Details</a>
-            </div>
-        }
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">@idea.Title</h5>
+            <p class="card-text">@idea.Content.Substring(0, Math.Min(100, idea.Content.Length))...</p>
+            <p class="card-text">
+                <small class="text-muted">By @idea.AuthorName on @idea.CreatedDate.("g")</small>
+            </p>
+
+            <p>
+                👍 @idea.LikeCount &nbsp;&nbsp;
+                💬 @idea.CommentCount
+            </p>
+
+            <a asp-action="Details" asp-route-id="@idea.IdeaId" class="btn btn-primary">View Details</a>
+
+            @if (Context.Session.GetInt32("UserId") != null)
+            {
+                <form asp-action="ToggleLike" method="post" style="display:inline;">
+                    <input type="hidden" name="ideaId" value="@idea.IdeaId" />
+                    <button type="submit" class="btn btn-outline-success">Like</button>
+                </form>
+            }
+        </div>
     </div>
 }

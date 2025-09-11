@@ -19,6 +19,14 @@ namespace BirFikrimVar.Controllers
         public async Task<IActionResult> Index()
         {
             var ideas = await _http.GetFromJsonAsync<List<IdeaDto>>("api/IdeasApi");
+
+            foreach (var idea in ideas)
+            {
+                idea.LikeCount = await _http.GetFromJsonAsync<int>($"api/LikesApi/count/{idea.IdeaId}");
+
+                idea.CommentCount = await _http.GetFromJsonAsync<int>($"api/CommentsApi/count/{idea.IdeaId}");
+            }
+
             return View(ideas);
         }
 

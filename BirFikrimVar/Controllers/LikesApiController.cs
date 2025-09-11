@@ -81,6 +81,14 @@ namespace BirFikrimVar.Controllers
             return NoContent();
         }
 
+        [HttpGet("check/{ideaId}/{userId}")]
+        public async Task<ActionResult<bool>> CheckUserLiked(int ideaId, int userId)
+        {
+            var hasLiked = await _context.Likes
+                .AnyAsync(like => like.IdeaId == ideaId && like.UserId == userId);
+
+            return hasLiked;
+        }
         private bool LikeExists(int id)
         {
             return _context.Likes.Any(e => e.LikeId == id);

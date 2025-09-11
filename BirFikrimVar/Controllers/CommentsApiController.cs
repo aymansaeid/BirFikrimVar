@@ -28,7 +28,26 @@ namespace BirFikrimVar.Controllers
             var res = await _context.Comments.ToListAsync();
             return res.Adapt<List<CommentDto>>();
         }
+        // GET: api/CommentsApi/idea/{ideaId}
+        [HttpGet("idea/{ideaId}")]
+        public async Task<ActionResult<IEnumerable<CommentDto>>> GetCommentsByIdea(int ideaId)
+        {
+            var comments = await _context.Comments
+                .Where(c => c.IdeaId == ideaId)
+                .ToListAsync();
 
+            return comments.Adapt<List<CommentDto>>();
+        }
+        // GET: api/CommentsApi/count/{ideaId}
+        [HttpGet("count/{ideaId}")]
+        public async Task<ActionResult<int>> GetCommentCount(int ideaId)
+        {
+            var count = await _context.Comments
+                .Where(comment => comment.IdeaId == ideaId)
+                .CountAsync();
+
+            return count;
+        }
         // GET: api/Comments/5
         [HttpGet("{id}")]
         public async Task<ActionResult<CommentDto>> GetComment(int id)

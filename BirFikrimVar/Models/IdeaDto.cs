@@ -13,5 +13,9 @@
         public DateTime? CreatedDate { get; set; }
 
         public int? LikeCount { get; set; }
+        public int? CommentCount { get; set; }
+
+        public string AuthorName { get; set; }
+
     }
 }

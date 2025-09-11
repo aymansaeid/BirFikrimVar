@@ -1,4 +1,4 @@
-﻿@model BirFikrimVar.Models.ViewModels.IdeaDetailsViewModel
+﻿@model BirFikrimVar.Models.IdeaDetailsViewModel
 
 @{
     ViewData["Title"] = "Idea Details";
@@ -33,9 +33,9 @@ else
         @foreach (var comment in Model.Comments)
         {
             <li class="list-group-item">
-                <strong>@comment.UserName:</strong> @comment.Content
+                <strong>@comment.UserId:</strong> @comment.Content
                 <br />
-                <small>@comment.CreatedDate.ToString("g")</small>
+                <small>@comment.CreatedDate.("g")</small>
             </li>
         }
     </ul>
