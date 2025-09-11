@@ -1,4 +1,5 @@
 ﻿using BirFikrimVar.Models;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -27,7 +28,24 @@ namespace BirFikrimVar.Controllers
             var idea = await _http.GetFromJsonAsync<IdeaDto>($"api/IdeasApi/{id}");
             if (idea == null) return NotFound();
 
-            return View(idea);
+            var comments = await _http.GetFromJsonAsync<List<CommentDto>>($"api/CommentsApi/idea/{id}");
+
+            var likeCount = await _http.GetFromJsonAsync<int>($"api/LikesApi/count/{id}");
+
+            // did current user likeed ?
+            var userId = HttpContext.Session.GetInt32("UserId");
+            bool userLiked = false;
+            if (userId.HasValue)
+            {
+                userLiked = await _http.GetFromJsonAsync<bool>($"api/LikesApi/check/{id}/{userId.Value}");
+            }
+
+            var vm = idea.Adapt<IdeaDetailsViewModel>();
+            vm.Comments = comments ?? new List<CommentDto>();
+            vm.LikeCount = likeCount;
+            vm.UserLiked = userLiked;
+
+            return View(vm);
         }
 
         // GET: /Ideas/Create
