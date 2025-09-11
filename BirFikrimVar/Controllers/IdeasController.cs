@@ -146,5 +146,17 @@ namespace BirFikrimVar.Controllers
             await _http.PostAsJsonAsync("api/CommentsApi", dto);
             return RedirectToAction("Details", new { id = ideaId });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleLike(int ideaId)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue) return RedirectToAction("Login", "Users");
+
+            await _http.PostAsJsonAsync("api/LikesApi/toggle", new { IdeaId = ideaId, UserId = userId.Value });
+
+            return RedirectToAction("Details", new { id = ideaId });
+        }
+
     }
 }
