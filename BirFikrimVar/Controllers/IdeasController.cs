@@ -41,7 +41,7 @@ namespace BirFikrimVar.Controllers
             }
 
             // Get comments for the idea
-            var comments = await _http.GetFromJsonAsync<List<CommentDto>>($"api/CommentsApi/byIdea/{id}")
+            var comments = await _http.GetFromJsonAsync<List<CommentDto>>($"api/CommentsApi/idea/{id}")
                            ?? new List<CommentDto>();
 
             // Optional: check if user liked it
@@ -56,7 +56,7 @@ namespace BirFikrimVar.Controllers
             {
                 Idea = idea,
                 Comments = comments,
-                LikeCount = idea.LikeCount,
+                LikeCount = (int)idea.LikeCount,
                 UserLiked = userLiked
             };
 
