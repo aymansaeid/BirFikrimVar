@@ -33,25 +33,32 @@ namespace BirFikrimVar.Controllers
         // GET: /Ideas/Details/5
         public async Task<IActionResult> Details(int id)
         {
+            // Get idea details
             var idea = await _http.GetFromJsonAsync<IdeaDto>($"api/IdeasApi/{id}");
-            if (idea == null) return NotFound();
+            if (idea == null)
+            {
+                return NotFound();
+            }
 
-            var comments = await _http.GetFromJsonAsync<List<CommentDto>>($"api/CommentsApi/idea/{id}");
+            // Get comments for the idea
+            var comments = await _http.GetFromJsonAsync<List<CommentDto>>($"api/CommentsApi/byIdea/{id}")
+                           ?? new List<CommentDto>();
 
-            var likeCount = await _http.GetFromJsonAsync<int>($"api/LikesApi/count/{id}");
-
-            // did current user likeed ?
-            var userId = HttpContext.Session.GetInt32("UserId");
+            // Optional: check if user liked it
+            int? userId = HttpContext.Session.GetInt32("UserId");
             bool userLiked = false;
             if (userId.HasValue)
             {
-                userLiked = await _http.GetFromJsonAsync<bool>($"api/LikesApi/check/{id}/{userId.Value}");
+                userLiked = await _http.GetFromJsonAsync<bool>($"api/IdeasApi/{id}/likedBy/{userId.Value}");
             }
 
-            var vm = idea.Adapt<IdeaDetailsViewModel>();
-            vm.Comments = comments ?? new List<CommentDto>();
-            vm.LikeCount = likeCount;
-            vm.UserLiked = userLiked;
+            var vm = new IdeaDetailsViewModel
+            {
+                Idea = idea,
+                Comments = comments,
+                LikeCount = idea.LikeCount,
+                UserLiked = userLiked
+            };
 
             return View(vm);
         }

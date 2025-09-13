@@ -1,0 +1,20 @@
+﻿@model IdeaDto
+
+<div class="card shadow-sm h-100">
+    <div class="card-body">
+        <h5 class="card-title">@Model.Title</h5>
+        <p class="card-text text-truncate">@Model.Content</p>
+        <p class="text-muted small mb-2">
+            By <strong>@Model.AuthorName</strong> · @Model.CreatedDate.("g")
+        </p>
+        <div class="d-flex justify-content-between">
+            <div>
+                <span class="me-3">👍 @Model.LikeCount</span>
+                <span>💬 @Model.CommentCount</span>
+            </div>
+            <a class="btn btn-sm btn-primary" asp-controller="Ideas" asp-action="Details" asp-route-id="@Model.IdeaId">
+                View
+            </a>
+        </div>
+    </div>
+</div>

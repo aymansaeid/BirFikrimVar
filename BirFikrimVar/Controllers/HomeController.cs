@@ -1,21 +1,29 @@
-using System.Diagnostics;
 using BirFikrimVar.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using static System.Net.WebRequestMethods;
 
 namespace BirFikrimVar.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly HttpClient _http;
 
-        public HomeController(ILogger<HomeController> logger)
+
+     
+        public HomeController(IHttpClientFactory httpClientFactory)
         {
-            _logger = logger;
+            _http = httpClientFactory.CreateClient("ApiClient");
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var ideas = await _http.GetFromJsonAsync<List<IdeaDto>>("api/IdeasApi");
+
+            if (ideas == null)
+                ideas = new List<IdeaDto>();
+
+            return View(ideas);
         }
 
         public IActionResult Privacy()

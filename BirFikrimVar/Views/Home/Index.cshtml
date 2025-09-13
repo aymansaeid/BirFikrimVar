@@ -1,7 +1,23 @@
-﻿@{
-    ViewData["Title"] = "Home Feed";
+﻿@model List<IdeaDto>
+
+@{
+    ViewData["Title"] = "Home - Ideas Feed";
 }
 
-<h1>Welcome to BirFikrimVar 🚀</h1>
-<p>This will be the main feed with all ideas.</p>
+<h2 class="mb-4">Latest Ideas</h2>
 
+<div class="row">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var idea in Model)
+        {
+            <div class="col-md-6 mb-4">
+                @Html.Partial("_IdeaCard", idea)
+            </div>
+        }
+    }
+    else
+    {
+        <p>No ideas yet. Be the first to post one!</p>
+    }
+</div>
