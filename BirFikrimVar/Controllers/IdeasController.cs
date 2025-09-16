@@ -49,7 +49,8 @@ namespace BirFikrimVar.Controllers
             bool userLiked = false;
             if (userId.HasValue)
             {
-                userLiked = await _http.GetFromJsonAsync<bool>($"api/IdeasApi/{id}/likedBy/{userId.Value}");
+                userLiked = await _http.GetFromJsonAsync<bool>($"api/LikesApi/check/{id}/{userId.Value}");
+
             }
 
             var vm = new IdeaDetailsViewModel
@@ -62,6 +63,35 @@ namespace BirFikrimVar.Controllers
 
             return View(vm);
         }
+        [HttpPost]
+        public async Task<IActionResult> ToggleLike(int ideaId)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+            {
+                return RedirectToAction("Login", "Users");
+            }
+
+            var hasLiked = await _http.GetFromJsonAsync<bool>($"api/LikesApi/check/{ideaId}/{userId.Value}");
+
+            if (hasLiked)
+            {
+                var likes = await _http.GetFromJsonAsync<List<LikeResponseDto>>("api/LikesApi");
+                var userLike = likes.FirstOrDefault(l => l.IdeaId == ideaId && l.UserId == userId.Value);
+                if (userLike != null)
+                {
+                    await _http.DeleteAsync($"api/LikesApi/{userLike.LikeId}");
+                }
+            }
+            else
+            {
+                var dto = new CreateLikeDto { IdeaId = ideaId, UserId = userId.Value };
+                await _http.PostAsJsonAsync("api/LikesApi", dto);
+            }
+
+            return RedirectToAction("Details", new { id = ideaId });
+        }
+
 
         // GET: /Ideas/Create
         public IActionResult Create()
@@ -162,16 +192,6 @@ namespace BirFikrimVar.Controllers
             return RedirectToAction("Details", new { id = ideaId });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ToggleLike(int ideaId)
-        {
-            var userId = HttpContext.Session.GetInt32("UserId");
-            if (!userId.HasValue) return RedirectToAction("Login", "Users");
-
-            await _http.PostAsJsonAsync("api/LikesApi/toggle", new { IdeaId = ideaId, UserId = userId.Value });
-
-            return RedirectToAction("Details", new { id = ideaId });
-        }
-
+    
     }
 }

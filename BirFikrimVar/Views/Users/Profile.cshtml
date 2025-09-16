@@ -1,0 +1,27 @@
+﻿@model BirFikrimVar.Models.UserProfileViewModel
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<h2>@Model.User.FullName's Profile</h2>
+<p><strong>Email:</strong> @Model.User.Email</p>
+
+<hr />
+<h3>My Ideas</h3>
+
+@if (!Model.Ideas.Any())
+{
+    <p>You haven't posted any ideas yet.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var idea in Model.Ideas)
+        {
+            <div class="col-md-4 mb-3">
+                @await Html.PartialAsync("_IdeaCard", idea)
+            </div>
+        }
+    </div>
+}
