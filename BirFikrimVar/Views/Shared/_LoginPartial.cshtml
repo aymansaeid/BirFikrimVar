@@ -25,12 +25,9 @@
 else
 {
     <li class="nav-item">
-        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
+        <a class="nav-link" asp-controller="Users" asp-action="Login">Login</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Register</a>
+        <a class="nav-link" asp-controller="Users" asp-action="Register">Register</a>
     </li>
 }
-
-@await Html.PartialAsync("~/Views/Users/Login.cshtml")
-@await Html.PartialAsync("~/Views/Users/Register.cshtml")

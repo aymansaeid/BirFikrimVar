@@ -10,6 +10,34 @@ public class UsersController : Controller
         _http = httpClientFactory.CreateClient("ApiClient");
     }
 
+    // GET: /Users/Profile
+    public async Task<IActionResult> Profile()
+    {
+        var userId = HttpContext.Session.GetInt32("UserId");
+        if (userId == null)
+            return RedirectToAction("Login");
+
+      
+       
+            // Get user info
+            var user = await _http.GetFromJsonAsync<UserDto>($"api/UsersApi/{userId}");
+            if (user == null)
+                return NotFound();
+
+            // Get user's ideas
+            var ideas = await _http.GetFromJsonAsync<List<IdeaDto>>($"api/IdeasApi/user/{userId}")
+                        ?? new List<IdeaDto>();
+
+            var model = new UserProfileDto
+            {
+                User = user,
+                Ideas = ideas
+            };
+
+            return View(model);
+        }
+
+    
 
     // GET: /Users
     public async Task<IActionResult> Index()

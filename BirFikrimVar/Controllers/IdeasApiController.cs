@@ -21,6 +21,30 @@ namespace BirFikrimVar.Controllers
             _context = context;
         }
 
+        // GET: api/Ideas/user/5
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<IdeaDto>>> GetIdeasByUser(int userId)
+        {
+            var ideas = await _context.Ideas
+                .Where(i => i.UserId == userId)
+                .OrderByDescending(i => i.CreatedDate)
+                .Select(i => new IdeaDto
+                {
+                    IdeaId = i.IdeaId,
+                    Title = i.Title,
+                    Content = i.Content,
+                    CreatedDate = i.CreatedDate,
+                    UserId = i.UserId,
+                    LikeCount = i.Likes.Count, 
+                    CommentCount = i.Comments.Count,
+                    AuthorName = i.User.FullName 
+
+                })
+                .ToListAsync();
+
+            return ideas;
+        }
+
         // GET: api/Ideas
         [HttpGet]
         public async Task<ActionResult<IEnumerable<IdeaDto>>> GetIdeas()
