@@ -142,14 +142,21 @@ namespace BirFikrimVar.Controllers
         public async Task<IActionResult> Edit(int id, UpdateIdeaDto dto)
         {
             if (!ModelState.IsValid)
+            {
                 return View(dto);
+            }
 
             var response = await _http.PutAsJsonAsync($"api/IdeasApi/{id}", dto);
 
             if (response.IsSuccessStatusCode)
-                return RedirectToAction(nameof(Index));
+            {
+                // Redirect back to profile after successful edit
+                var userId = HttpContext.Session.GetInt32("UserId");
+                return RedirectToAction("Profile", "Users", new { id = userId });
+            }
 
-            ModelState.AddModelError("", "Failed to update idea.");
+            // If API fails, show error
+            ModelState.AddModelError(string.Empty, "Unable to save changes. Please try again.");
             return View(dto);
         }
 
