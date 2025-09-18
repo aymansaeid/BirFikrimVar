@@ -73,36 +73,21 @@ namespace BirFikrimVar.Controllers
             return res;
         }
 
-        // PUT: api/Comments/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // PUT: api/CommentsApi/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutComment(int id, [FromBody] UpdateCommentDto commentdto)
+        public async Task<IActionResult> PutComment(int id, UpdateCommentDto dto)
         {
             var comment = await _context.Comments.FindAsync(id);
             if (comment == null)
-            {
                 return NotFound();
-            }
-            commentdto.Adapt(comment);
 
-            _context.Entry(comment).State = EntityState.Modified;
+            if (comment.UserId != dto.UserId)
+                return Forbid(); 
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CommentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            comment.Content = dto.Content;
+            comment.CreatedDate = DateTime.Now;
 
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
@@ -119,19 +104,19 @@ namespace BirFikrimVar.Controllers
             return CreatedAtAction("GetComment", new { id = comment.CommentId }, comment);
         }
 
-        // DELETE: api/Comments/5
+        // DELETE: api/CommentsApi/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteComment(int id)
+        public async Task<IActionResult> DeleteComment(int id, [FromQuery] int userId)
         {
             var comment = await _context.Comments.FindAsync(id);
             if (comment == null)
-            {
                 return NotFound();
-            }
+
+            if (comment.UserId != userId)
+                return Forbid(); 
 
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 

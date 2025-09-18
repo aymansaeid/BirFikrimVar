@@ -232,7 +232,53 @@ namespace BirFikrimVar.Controllers
             await _http.PostAsJsonAsync("api/CommentsApi", dto);
             return RedirectToAction("Details", new { id = ideaId });
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditComment(int commentId, string content)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                TempData["Error"] = "You must be logged in.";
+                return RedirectToAction("Login", "Users");
+            }
 
-    
+            var response = await _http.PutAsJsonAsync($"api/CommentsApi/{commentId}", new { Content = content, UserId = userId.Value });
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "Comment updated successfully.";
+            }
+            else
+            {
+                TempData["Error"] = "Failed to update comment.";
+            }
+
+            return Redirect(Request.Headers["Referer"].ToString());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteComment(int commentId)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                TempData["Error"] = "You must be logged in.";
+                return RedirectToAction("Login", "Users");
+            }
+
+            var response = await _http.DeleteAsync($"api/CommentsApi/{commentId}?userId={userId.Value}");
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "Comment deleted successfully.";
+            }
+            else
+            {
+                TempData["Error"] = "Failed to delete comment.";
+            }
+
+            return Redirect(Request.Headers["Referer"].ToString());
+        }
+
     }
 }
