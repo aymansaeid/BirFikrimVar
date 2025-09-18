@@ -49,8 +49,21 @@ namespace BirFikrimVar.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<IdeaDto>>> GetIdeas()
         {
-            var res = await _context.Ideas.ToListAsync();
-            return res.Adapt<List<IdeaDto>>();
+            var ideas = await _context.Ideas
+                .Include(i => i.User) // for AuthorName
+                .Select(i => new IdeaDto
+                {
+                    IdeaId = i.IdeaId,
+                    Title = i.Title,
+                    Content = i.Content,
+                    AuthorName = i.User.FullName,
+                    CreatedDate = i.CreatedDate,
+                    LikeCount = i.Likes.Count(),       // count likes
+                    CommentCount = i.Comments.Count()  // count comments
+                })
+                .ToListAsync();
+
+            return Ok(ideas);
         }
 
         // GET: api/Ideas/5

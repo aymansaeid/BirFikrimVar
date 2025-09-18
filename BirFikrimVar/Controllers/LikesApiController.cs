@@ -51,18 +51,58 @@ namespace BirFikrimVar.Controllers
         }
 
         // POST: api/Likes1
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Like>> PostLike(CreateLikeDto dto)
+        public async Task<ActionResult<LikeResponseDto>> PostLike(CreateLikeDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Check if user already liked this idea
+            var existingLike = await _context.Likes
+                .FirstOrDefaultAsync(l => l.IdeaId == dto.IdeaId && l.UserId == dto.UserId);
+
+            if (existingLike != null)
+            {
+                return Conflict("User has already liked this idea.");
+            }
+
+            // Check if the idea exists
+            var ideaExists = await _context.Ideas.AnyAsync(i => i.IdeaId == dto.IdeaId);
+            if (!ideaExists)
+            {
+                return BadRequest("Idea does not exist.");
+            }
+
+            // Check if the user exists
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == dto.UserId);
+            if (!userExists)
+            {
+                return BadRequest("User does not exist.");
+            }
+
             var like = dto.Adapt<Like>();
             like.CreatedDate = DateTime.Now;
 
             _context.Likes.Add(like);
             await _context.SaveChangesAsync();
 
-            var result = like.Adapt<LikeResponseDto>();
-            return Ok(result);
+            // Get the created like with user information
+            var createdLike = await _context.Likes
+                .Include(l => l.User)
+                .FirstOrDefaultAsync(l => l.LikeId == like.LikeId);
+
+            var result = new LikeResponseDto
+            {
+                LikeId = createdLike.LikeId,
+                IdeaId = createdLike.IdeaId,
+                UserId = createdLike.UserId,
+                FullName = createdLike.User.FullName,
+                CreatedDate = createdLike.CreatedDate ?? DateTime.Now
+            };
+
+            return CreatedAtAction(nameof(GetLikes), new { id = like.LikeId }, result);
         }
 
         // DELETE: api/Likes1/5
@@ -81,6 +121,24 @@ namespace BirFikrimVar.Controllers
             return NoContent();
         }
 
+        // NEW: DELETE: api/LikesApi/unlike/5/10 (ideaId/userId)
+        [HttpDelete("unlike/{ideaId}/{userId}")]
+        public async Task<IActionResult> UnlikeIdea(int ideaId, int userId)
+        {
+            var like = await _context.Likes
+                .FirstOrDefaultAsync(l => l.IdeaId == ideaId && l.UserId == userId);
+
+            if (like == null)
+            {
+                return NotFound("Like not found.");
+            }
+
+            _context.Likes.Remove(like);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         [HttpGet("check/{ideaId}/{userId}")]
         public async Task<ActionResult<bool>> CheckUserLiked(int ideaId, int userId)
         {
@@ -89,6 +147,7 @@ namespace BirFikrimVar.Controllers
 
             return hasLiked;
         }
+
         private bool LikeExists(int id)
         {
             return _context.Likes.Any(e => e.LikeId == id);

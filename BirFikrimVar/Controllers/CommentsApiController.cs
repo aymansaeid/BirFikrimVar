@@ -34,9 +34,19 @@ namespace BirFikrimVar.Controllers
         {
             var comments = await _context.Comments
                 .Where(c => c.IdeaId == ideaId)
+                .Include(c => c.User) 
+                .Select(c => new CommentDto
+                {
+                    CommentId = c.CommentId,
+                    IdeaId = c.IdeaId,
+                    UserId = c.UserId,
+                    authorName = c.User.FullName, 
+                    Content = c.Content,
+                    CreatedDate = c.CreatedDate
+                })
                 .ToListAsync();
 
-            return comments.Adapt<List<CommentDto>>();
+            return Ok(comments);
         }
         // GET: api/CommentsApi/count/{ideaId}
         [HttpGet("count/{ideaId}")]

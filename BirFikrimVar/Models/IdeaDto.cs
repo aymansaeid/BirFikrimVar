@@ -17,5 +17,7 @@
 
         public string AuthorName { get; set; }
 
+        public bool UserLiked { get; set; } 
+
     }
 }

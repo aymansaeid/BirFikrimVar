@@ -33,63 +33,97 @@ namespace BirFikrimVar.Controllers
         // GET: /Ideas/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            // Get idea details
-            var idea = await _http.GetFromJsonAsync<IdeaDto>($"api/IdeasApi/{id}");
-            if (idea == null)
+            try
             {
-                return NotFound();
+                // Get the idea
+                var idea = await _http.GetFromJsonAsync<IdeaDto>($"api/IdeasApi/{id}");
+                if (idea == null)
+                {
+                    return NotFound();
+                }
+
+                // Get comments for this idea
+                var comments = await _http.GetFromJsonAsync<List<CommentDto>>($"api/CommentsApi/idea/{id}");
+
+                // Get like count
+                var likeCount = await _http.GetFromJsonAsync<int>($"api/LikesApi/count/{id}");
+
+                // Check if current user liked this idea
+                bool userLiked = false;
+                var userId = GetCurrentUserId();
+                if (userId.HasValue)
+                {
+                    userLiked = await _http.GetFromJsonAsync<bool>($"api/LikesApi/check/{id}/{userId}");
+                }
+
+                var viewModel = new IdeaDetailsViewModel
+                {
+                    Idea = idea,
+                    Comments = comments ?? new List<CommentDto>(),
+                    LikeCount = likeCount,
+                    UserLiked = userLiked
+                };
+
+                return View(viewModel);
             }
-
-            // Get comments for the idea
-            var comments = await _http.GetFromJsonAsync<List<CommentDto>>($"api/CommentsApi/idea/{id}")
-                           ?? new List<CommentDto>();
-
-            // Optional: check if user liked it
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            bool userLiked = false;
-            if (userId.HasValue)
+            catch (Exception ex)
             {
-                userLiked = await _http.GetFromJsonAsync<bool>($"api/LikesApi/check/{id}/{userId.Value}");
-
+                // Log the exception
+                TempData["Error"] = "Failed to load idea details.";
+                return RedirectToAction("Index");
             }
-
-            var vm = new IdeaDetailsViewModel
-            {
-                Idea = idea,
-                Comments = comments,
-                LikeCount = (int)idea.LikeCount,
-                UserLiked = userLiked
-            };
-
-            return View(vm);
         }
+        private int? GetCurrentUserId()
+        {
+            return HttpContext.Session.GetInt32("UserId");
+        }
+
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleLike(int ideaId)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (!userId.HasValue)
+            var userId = GetCurrentUserId(); // Replace with your auth logic
+            if (userId == null)
             {
-                return RedirectToAction("Login", "Users");
+                TempData["Error"] = "You must be logged in to like an idea.";
+                return RedirectToAction("Login", "Account");
             }
 
-            var hasLiked = await _http.GetFromJsonAsync<bool>($"api/LikesApi/check/{ideaId}/{userId.Value}");
-
-            if (hasLiked)
+            var createLikeDto = new CreateLikeDto
             {
-                var likes = await _http.GetFromJsonAsync<List<LikeResponseDto>>("api/LikesApi");
-                var userLike = likes.FirstOrDefault(l => l.IdeaId == ideaId && l.UserId == userId.Value);
-                if (userLike != null)
+                IdeaId = ideaId,
+                UserId = userId.Value
+            };
+
+            var response = await _http.PostAsJsonAsync("api/LikesApi", createLikeDto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "Idea liked successfully.";
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                // User already liked → send DELETE request to unlike
+                var deleteResponse = await _http.DeleteAsync($"api/LikesApi/{ideaId}/{userId.Value}");
+                if (deleteResponse.IsSuccessStatusCode)
                 {
-                    await _http.DeleteAsync($"api/LikesApi/{userLike.LikeId}");
+                    TempData["Success"] = "Like removed successfully.";
+                }
+                else
+                {
+                    TempData["Error"] = "Failed to remove like.";
                 }
             }
             else
             {
-                var dto = new CreateLikeDto { IdeaId = ideaId, UserId = userId.Value };
-                await _http.PostAsJsonAsync("api/LikesApi", dto);
+                var errorContent = await response.Content.ReadAsStringAsync();
+                TempData["Error"] = $"Failed to like the idea. {errorContent}";
             }
 
-            return RedirectToAction("Details", new { id = ideaId });
+            // Redirect back to the page where the request came from
+            var referer = Request.Headers["Referer"].ToString();
+            return Redirect(!string.IsNullOrEmpty(referer) ? referer : Url.Action("Index", "Ideas"));
         }
 
 
