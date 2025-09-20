@@ -4724,6 +4724,35 @@ textarea.form-control-lg {
                 overflow-y: visible;
             }
 }
+.auth-container {
+    background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+    padding: 20px;
+}
+
+.auth-card {
+    background-color: #2d2d2d;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+.auth-card h2 {
+    color: #fff;
+}
+
+.auth-card .form-label {
+    color: #ccc;
+}
+
+.btn-login {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+
+.btn-login:hover {
+    background-color: #0069d9;
+    transform: translateY(-1px);
+}
 
 @media (min-width: 1200px) {
     .navbar-expand-xl {

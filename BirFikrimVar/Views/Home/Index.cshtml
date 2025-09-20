@@ -9,15 +9,15 @@
 @if (!isLoggedIn)
 {
     <div class="container py-5 text-center">
-        <h1 class="display-4">Welcome to <span class="text-primary">BirFikrimVar</span></h1>
+        <h1 class="display-4 fw-bold">
+            Welcome to <span class="text-primary">BirFikrimVar</span>
+        </h1>
         <p class="lead mt-3">
-            This is a platform where students can share their creative ideas, collaborate,
-            and get feedback.
-            To get started, please
-            <a href="" >Login</a> or
-            <a href="" >Register</a>.
+            This is a platform where students can share their creative ideas 💡 , collaborate,
+            and get feedback , To get started, please
+            <a asp-controller="Users" asp-action="Login" class="fw-semibold">Login</a> or
+            <a asp-controller="Users" asp-action="Register" class="fw-semibold">Register</a>.
         </p>
-
         <p class="text-muted mt-4">
             Once logged in, you’ll be able to post your own ideas and explore what others are working on.
         </p>
@@ -25,23 +25,22 @@
 }
 else
 {
-    <h2 class="mb-4">Latest Ideas</h2>
-    <div class="row">
+    <div class="container" style="max-width: 650px;">
+        <h4 class="mb-4">Latest Ideas 📰</h4>
+
         @if (Model != null && Model.Any())
         {
             foreach (var idea in Model)
             {
-                <div class="col-md-6 mb-4">
-                    @Html.Partial("_IdeaCard", idea)
-                </div>
+                @Html.Partial("_IdeaCard", idea)
             }
         }
         else
         {
-            <p>
+            <div class="alert alert-light border text-center">
                 No ideas yet. Be the first to
                 <a asp-controller="Ideas" asp-action="Create">post one!</a>
-            </p>
+            </div>
         }
     </div>
 }

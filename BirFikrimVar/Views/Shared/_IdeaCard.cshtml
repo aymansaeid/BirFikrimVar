@@ -1,19 +1,29 @@
 ﻿@model IdeaDto
 
-<div class="card shadow-sm h-100">
+<div class="card mb-4 shadow-sm border-0 rounded-3">
     <div class="card-body">
-        <h5 class="card-title">@Model.Title</h5>
-        <p class="card-text text-truncate">@Model.Content</p>
-        <p class="text-muted small mb-2">
-            By <strong>@Model.AuthorName</strong> · @Model.CreatedDate.("g")
-        </p>
-        <div class="d-flex justify-content-between">
-            <div>
-                <span class="me-3">👍 @Model.LikeCount</span>
-                <span>💬 @Model.CommentCount</span>
+        <div class="d-flex align-items-center mb-3">
+            <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                 style="width:40px; height:40px; font-weight:bold;">
+                @Model.AuthorName.Substring(0, 1).ToUpper()
             </div>
-            <a class="btn btn-sm btn-primary" asp-controller="Ideas" asp-action="Details" asp-route-id="@Model.IdeaId">
-                View
+            <div class="ms-3">
+                <h6 class="mb-0 fw-semibold">@Model.AuthorName</h6>
+                <small class="text-muted">@Model.CreatedDate</small>
+            </div>
+        </div>
+
+        <h5 class="fw-bold">@Model.Title</h5>
+        <p class="mb-3">@Model.Content</p>
+
+        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+            <div class="d-flex gap-4">
+                <span class="text-muted small">👍 @Model.LikeCount</span>
+                <span class="text-muted small">💬 @Model.CommentCount</span>
+            </div>
+            <a class="btn btn-sm btn-outline-primary"
+               asp-controller="Ideas" asp-action="Details" asp-route-id="@Model.IdeaId">
+                View Idea
             </a>
         </div>
     </div>
